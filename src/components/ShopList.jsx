@@ -10,7 +10,7 @@ export default function ShopList({ shops, selectedShop, onShopSelect }) {
   }
 
   return (
-    <div className="overflow-y-auto h-full">
+    <div>
       {shops.map((shop) => (
         <ShopCard
           key={shop.id}
