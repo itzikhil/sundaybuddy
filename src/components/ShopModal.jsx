@@ -34,7 +34,7 @@ export default function ShopModal({ shop, onClose }) {
 
   return (
     <div
-      className="fixed inset-0 bg-black/50 z-[2000] flex items-center justify-center p-4"
+      className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[2000] flex items-center justify-center p-4"
       onClick={handleOverlayClick}
     >
       <div className="bg-white rounded-2xl max-w-md w-full max-h-[90vh] overflow-hidden shadow-2xl">

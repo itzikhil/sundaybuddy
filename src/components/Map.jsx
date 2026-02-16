@@ -53,9 +53,10 @@ function MapResizer({ isSidebarOpen }) {
   const map = useMap()
 
   useEffect(() => {
+    // Wait for sidebar transition to complete before resizing
     setTimeout(() => {
       map.invalidateSize()
-    }, 100)
+    }, 300)
   }, [isSidebarOpen, map])
 
   return null

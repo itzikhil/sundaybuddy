@@ -15,6 +15,12 @@ function App() {
   const [showOpenOnly, setShowOpenOnly] = useState(false)
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
 
+  // Smart click handler: hide preview card, then open modal
+  const handleShopSelect = (shop) => {
+    setHoveredShop(null)
+    setSelectedShop(shop)
+  }
+
   const filteredShops = useMemo(() => {
     let shops = shopsData
 
@@ -51,7 +57,7 @@ function App() {
         <div className="flex-1 relative h-full w-full">
           <Map
             shops={filteredShops}
-            onShopSelect={setSelectedShop}
+            onShopSelect={handleShopSelect}
             onShopHover={setHoveredShop}
             isSidebarOpen={isSidebarOpen}
             onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
@@ -63,11 +69,11 @@ function App() {
 
       {/* Sidebar - fixed width, flex-shrink-0 prevents shrinking */}
       {isSidebarOpen && (
-        <div className="w-96 flex-shrink-0 border-l border-gray-200 overflow-hidden bg-white">
+        <div className="w-80 flex-shrink-0 border-l border-gray-200 overflow-hidden bg-white transition-all duration-300">
           <Sidebar
             shops={filteredShops}
             selectedShop={selectedShop}
-            onShopSelect={setSelectedShop}
+            onShopSelect={handleShopSelect}
             searchQuery={searchQuery}
             onSearchChange={setSearchQuery}
             showOpenOnly={showOpenOnly}

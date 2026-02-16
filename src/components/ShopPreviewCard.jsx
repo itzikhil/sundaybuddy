@@ -19,7 +19,7 @@ export default function ShopPreviewCard({ shop }) {
   const open = isOpen(shop.sundayHours)
 
   return (
-    <div className="absolute top-4 right-4 z-[1000] w-80 bg-white rounded-xl shadow-2xl border border-gray-100 p-4 animate-fade-in">
+    <div className="absolute top-4 right-4 z-[1000] w-80 bg-white rounded-xl shadow-2xl border border-gray-100 p-4 pointer-events-none animate-fade-in-up">
       {/* Header */}
       <div className="mb-3">
         <h3 className="font-bold text-gray-900 text-lg leading-tight mb-2">
