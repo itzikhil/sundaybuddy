@@ -1,5 +1,5 @@
 import { X, Navigation, Star, Clock, MapPin } from 'lucide-react'
-import { isOpen, getDirectionsUrl } from '../utils/timeUtils'
+import { isOpen } from '../utils/timeUtils'
 
 const tagIcons = {
   wifi: 'WiFi',
@@ -30,6 +30,11 @@ export default function ShopModal({ shop, onClose }) {
     if (e.target === e.currentTarget) {
       onClose()
     }
+  }
+
+  const handleNavigate = () => {
+    // Opens Google Maps in "Directions" mode with the destination set
+    window.open(`https://www.google.com/maps/dir/?api=1&destination=${shop.lat},${shop.lng}`, '_blank')
   }
 
   return (
@@ -105,15 +110,13 @@ export default function ShopModal({ shop, onClose }) {
           )}
 
           {/* Action Button */}
-          <a
-            href={getDirectionsUrl(shop.lat, shop.lng)}
-            target="_blank"
-            rel="noopener noreferrer"
+          <button
+            onClick={handleNavigate}
             className="flex items-center justify-center gap-2 w-full bg-amber-700 hover:bg-amber-800 text-white font-semibold py-3 px-4 rounded-xl transition-colors"
           >
             <Navigation size={18} />
             Navigate There
-          </a>
+          </button>
         </div>
       </div>
     </div>
