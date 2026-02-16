@@ -1,8 +1,7 @@
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
 import { useState, useEffect } from 'react'
 import L from 'leaflet'
-import { Navigation, Crosshair } from 'lucide-react'
-import { isOpen, getDirectionsUrl } from '../utils/timeUtils'
+import { Crosshair, PanelLeft } from 'lucide-react'
 import 'leaflet/dist/leaflet.css'
 
 // Fix for default marker icons in Leaflet with bundlers
@@ -50,39 +49,6 @@ const userLocationIcon = L.divIcon({
   iconAnchor: [8, 8],
 })
 
-function ShopPopup({ shop }) {
-  const open = isOpen(shop.sundayHours)
-
-  return (
-    <div className="text-sm min-w-[180px]">
-      <div className="flex items-start justify-between gap-2 mb-1">
-        <strong className="text-gray-900">{shop.name}</strong>
-        <span
-          className={`flex items-center gap-1 text-xs px-1.5 py-0.5 rounded-full font-medium shrink-0 ${
-            open ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-          }`}
-        >
-          <span
-            className={`w-1.5 h-1.5 rounded-full ${open ? 'bg-green-500' : 'bg-red-500'}`}
-          />
-          {open ? 'Open' : 'Closed'}
-        </span>
-      </div>
-      <div className="text-gray-600 mb-1">{shop.category}</div>
-      <div className="text-gray-500 mb-2">{shop.sundayHours}</div>
-      <a
-        href={getDirectionsUrl(shop.lat, shop.lng)}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="inline-flex items-center gap-1 text-xs font-medium text-gray-600 px-2 py-1 border border-gray-300 rounded hover:bg-gray-100 hover:text-gray-900 transition-colors"
-      >
-        <Navigation size={12} />
-        Get Directions
-      </a>
-    </div>
-  )
-}
-
 function LocateButton({ onLocationFound }) {
   const map = useMap()
 
@@ -114,7 +80,19 @@ function LocateButton({ onLocationFound }) {
   )
 }
 
-export default function Map({ shops, onShopSelect, selectedShop }) {
+function SidebarToggleButton({ isOpen, onToggle }) {
+  return (
+    <button
+      onClick={onToggle}
+      className="absolute top-24 left-3 z-[1000] bg-white p-2.5 rounded-full shadow-md border border-gray-200 hover:bg-gray-50 transition-colors"
+      title={isOpen ? 'Hide sidebar' : 'Show sidebar'}
+    >
+      <PanelLeft size={20} className={`text-gray-700 transition-transform ${isOpen ? '' : 'rotate-180'}`} />
+    </button>
+  )
+}
+
+export default function Map({ shops, onShopSelect, onShopHover, isSidebarOpen, onToggleSidebar }) {
   const center = [52.52, 13.405] // Berlin center
   const [userPosition, setUserPosition] = useState(null)
 
@@ -126,8 +104,8 @@ export default function Map({ shops, onShopSelect, selectedShop }) {
         className="h-full w-full"
       >
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution='&copy; <a href="https://carto.com/">CARTO</a>'
+          url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
         />
         {shops.map((shop) => (
           <Marker
@@ -135,13 +113,11 @@ export default function Map({ shops, onShopSelect, selectedShop }) {
             position={[shop.lat, shop.lng]}
             icon={createCustomIcon(shop.category)}
             eventHandlers={{
+              mouseover: () => onShopHover(shop),
+              mouseout: () => onShopHover(null),
               click: () => onShopSelect(shop),
             }}
-          >
-            <Popup>
-              <ShopPopup shop={shop} />
-            </Popup>
-          </Marker>
+          />
         ))}
         {userPosition && (
           <Marker position={userPosition} icon={userLocationIcon}>
@@ -150,6 +126,7 @@ export default function Map({ shops, onShopSelect, selectedShop }) {
         )}
         <LocateButton onLocationFound={setUserPosition} />
       </MapContainer>
+      <SidebarToggleButton isOpen={isSidebarOpen} onToggle={onToggleSidebar} />
     </div>
   )
 }

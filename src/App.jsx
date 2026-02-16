@@ -4,12 +4,13 @@ import FilterBar from './components/FilterBar'
 import Map from './components/Map'
 import Sidebar from './components/Sidebar'
 import ShopModal from './components/ShopModal'
+import ShopPreviewCard from './components/ShopPreviewCard'
 import shopsData from './data/shops.json'
 
 function App() {
   const [activeFilter, setActiveFilter] = useState('All')
   const [selectedShop, setSelectedShop] = useState(null)
-  const [modalShop, setModalShop] = useState(null)
+  const [hoveredShop, setHoveredShop] = useState(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [showOpenOnly, setShowOpenOnly] = useState(false)
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
@@ -40,41 +41,43 @@ function App() {
   }, [activeFilter, searchQuery, showOpenOnly])
 
   return (
-    <div className="h-screen flex flex-col bg-gray-50">
-      <Header />
-      <FilterBar activeFilter={activeFilter} onFilterChange={setActiveFilter} />
+    <div className="flex h-screen w-screen overflow-hidden">
+      {/* Main Content Area */}
+      <div className="flex flex-col flex-1">
+        <Header />
+        <FilterBar activeFilter={activeFilter} onFilterChange={setActiveFilter} />
 
-      <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
-        {/* Map - full width when sidebar closed, otherwise shares space */}
-        <div className={`h-64 md:h-full order-1 md:order-none ${isSidebarOpen ? 'md:flex-1' : 'md:w-full'}`}>
+        {/* Map wrapper - flex-1 ensures it fills remaining space */}
+        <div className="flex-1 relative">
           <Map
             shops={filteredShops}
-            selectedShop={selectedShop}
             onShopSelect={setSelectedShop}
-            onShopClick={setModalShop}
+            onShopHover={setHoveredShop}
             isSidebarOpen={isSidebarOpen}
             onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
           />
+          {/* Floating Preview Card */}
+          <ShopPreviewCard shop={hoveredShop} />
         </div>
-
-        {/* Sidebar - scrollable list on right side */}
-        {isSidebarOpen && (
-          <div className="flex-1 md:w-96 md:flex-none border-l border-gray-200 overflow-hidden order-2 md:order-none">
-            <Sidebar
-              shops={filteredShops}
-              selectedShop={selectedShop}
-              onShopSelect={setSelectedShop}
-              searchQuery={searchQuery}
-              onSearchChange={setSearchQuery}
-              showOpenOnly={showOpenOnly}
-              onToggleOpenOnly={setShowOpenOnly}
-            />
-          </div>
-        )}
       </div>
 
+      {/* Sidebar - fixed width, flex-shrink-0 prevents shrinking */}
+      {isSidebarOpen && (
+        <div className="w-96 flex-shrink-0 border-l border-gray-200 overflow-hidden bg-white">
+          <Sidebar
+            shops={filteredShops}
+            selectedShop={selectedShop}
+            onShopSelect={setSelectedShop}
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            showOpenOnly={showOpenOnly}
+            onToggleOpenOnly={setShowOpenOnly}
+          />
+        </div>
+      )}
+
       {/* Shop Detail Modal */}
-      <ShopModal shop={modalShop} onClose={() => setModalShop(null)} />
+      <ShopModal shop={selectedShop} onClose={() => setSelectedShop(null)} />
     </div>
   )
 }
