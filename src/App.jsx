@@ -47,8 +47,8 @@ function App() {
         <Header />
         <FilterBar activeFilter={activeFilter} onFilterChange={setActiveFilter} />
 
-        {/* Map wrapper - flex-1 ensures it fills remaining space */}
-        <div className="flex-1 relative">
+        {/* Map wrapper - flex-1 h-full w-full ensures it fills remaining space */}
+        <div className="flex-1 relative h-full w-full">
           <Map
             shops={filteredShops}
             onShopSelect={setSelectedShop}

@@ -49,6 +49,18 @@ const userLocationIcon = L.divIcon({
   iconAnchor: [8, 8],
 })
 
+function MapResizer({ isSidebarOpen }) {
+  const map = useMap()
+
+  useEffect(() => {
+    setTimeout(() => {
+      map.invalidateSize()
+    }, 100)
+  }, [isSidebarOpen, map])
+
+  return null
+}
+
 function LocateButton({ onLocationFound }) {
   const map = useMap()
 
@@ -103,6 +115,7 @@ export default function Map({ shops, onShopSelect, onShopHover, isSidebarOpen, o
         zoom={12}
         className="h-full w-full"
       >
+        <MapResizer isSidebarOpen={isSidebarOpen} />
         <TileLayer
           attribution='&copy; <a href="https://carto.com/">CARTO</a>'
           url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
