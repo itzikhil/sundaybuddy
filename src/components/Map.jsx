@@ -1,4 +1,5 @@
 import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents } from 'react-leaflet'
+import MarkerClusterGroup from 'react-leaflet-cluster'
 import { useState, useEffect } from 'react'
 import L from 'leaflet'
 import { Crosshair, PanelLeft, Plus } from 'lucide-react'
@@ -13,21 +14,32 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
 })
 
-// Category colors for markers
+// Category colors for markers - vibrant and distinct
 const categoryColors = {
-  // Shopping (earthy tones)
+  // Shopping
   supermarket: '#10b981', // green
-  convenience: '#f59e0b', // amber
+  convenience: '#f59e0b', // amber (Späti)
   bakery: '#d97706', // orange
   pharmacy: '#ef4444', // red
-  kiosk: '#6b7280', // gray
+  kiosk: '#f59e0b', // amber
 
-  // Family Attractions (fun colors)
+  // Family Attractions
   kid_cafe: '#8b5cf6', // purple
   petting_zoo: '#ec4899', // pink
-  indoor_play: '#f472b6', // light pink
+  indoor_play: '#8b5cf6', // purple
   museum: '#06b6d4', // cyan
 }
+
+// Legend items for display
+const legendItems = [
+  { label: 'Supermarket', color: '#10b981' },
+  { label: 'Späti/Kiosk', color: '#f59e0b' },
+  { label: 'Bakery', color: '#d97706' },
+  { label: 'Pharmacy', color: '#ef4444' },
+  { label: 'Family/Play', color: '#8b5cf6' },
+  { label: 'Museum', color: '#06b6d4' },
+  { label: 'Closed', color: '#9ca3af' },
+]
 
 function getCategoryColor(category) {
   if (!category) return '#6b7280'
@@ -36,7 +48,6 @@ function getCategoryColor(category) {
 }
 
 function createCustomIcon(category, shopIsOpen) {
-  // Use category color if open, gray if closed
   const baseColor = getCategoryColor(category)
   const color = shopIsOpen ? baseColor : '#9ca3af'
   return L.divIcon({
@@ -51,6 +62,41 @@ function createCustomIcon(category, shopIsOpen) {
     "></div>`,
     iconSize: [24, 24],
     iconAnchor: [12, 12],
+  })
+}
+
+// Custom cluster icon
+function createClusterCustomIcon(cluster) {
+  const count = cluster.getChildCount()
+  let size = 'small'
+  if (count > 20) size = 'large'
+  else if (count > 10) size = 'medium'
+
+  const sizes = {
+    small: { width: 30, fontSize: 12 },
+    medium: { width: 40, fontSize: 14 },
+    large: { width: 50, fontSize: 16 },
+  }
+
+  const { width, fontSize } = sizes[size]
+
+  return L.divIcon({
+    html: `<div style="
+      background-color: #784f33;
+      color: white;
+      width: ${width}px;
+      height: ${width}px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: ${fontSize}px;
+      border: 3px solid white;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    ">${count}</div>`,
+    className: 'custom-cluster-icon',
+    iconSize: L.point(width, width, true),
   })
 }
 
@@ -72,7 +118,6 @@ function MapResizer({ isSidebarOpen }) {
   const map = useMap()
 
   useEffect(() => {
-    // Wait for sidebar transition to complete before resizing
     setTimeout(() => {
       map.invalidateSize()
     }, 300)
@@ -151,6 +196,25 @@ function MapClickHandler({ isAddMode, onMapClick }) {
   return null
 }
 
+function Legend() {
+  return (
+    <div className="absolute bottom-6 left-3 z-[1000] bg-white rounded-lg shadow-lg border border-gray-200 p-3">
+      <h4 className="text-xs font-semibold text-gray-700 mb-2">Categories</h4>
+      <div className="space-y-1.5">
+        {legendItems.map((item) => (
+          <div key={item.label} className="flex items-center gap-2">
+            <span
+              className="w-3 h-3 rounded-full flex-shrink-0"
+              style={{ backgroundColor: item.color }}
+            />
+            <span className="text-xs text-gray-600">{item.label}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 export default function Map({ shops, onShopSelect, onShopHover, isSidebarOpen, onToggleSidebar, isAddMode, onToggleAddMode, onMapClick }) {
   const center = [52.52, 13.405] // Berlin center
   const [userPosition, setUserPosition] = useState(null)
@@ -168,21 +232,29 @@ export default function Map({ shops, onShopSelect, onShopHover, isSidebarOpen, o
           attribution='&copy; <a href="https://carto.com/">CARTO</a>'
           url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
         />
-        {shops.map((shop) => {
-          const shopIsOpen = isOpen(shop.sundayHours, shop.isOpen)
-          return (
-            <Marker
-              key={shop.id}
-              position={[shop.lat, shop.lng]}
-              icon={createCustomIcon(shop.category, shopIsOpen)}
-              eventHandlers={{
-                mouseover: () => onShopHover(shop),
-                mouseout: () => onShopHover(null),
-                click: () => onShopSelect(shop),
-              }}
-            />
-          )
-        })}
+        <MarkerClusterGroup
+          chunkedLoading
+          iconCreateFunction={createClusterCustomIcon}
+          maxClusterRadius={50}
+          spiderfyOnMaxZoom={true}
+          showCoverageOnHover={false}
+        >
+          {shops.map((shop) => {
+            const shopIsOpen = isOpen(shop.sundayHours, shop.isOpen)
+            return (
+              <Marker
+                key={shop.id}
+                position={[shop.lat, shop.lng]}
+                icon={createCustomIcon(shop.category, shopIsOpen)}
+                eventHandlers={{
+                  mouseover: () => onShopHover(shop),
+                  mouseout: () => onShopHover(null),
+                  click: () => onShopSelect(shop),
+                }}
+              />
+            )
+          })}
+        </MarkerClusterGroup>
         {userPosition && (
           <Marker position={userPosition} icon={userLocationIcon}>
             <Popup>You are here</Popup>
@@ -192,6 +264,7 @@ export default function Map({ shops, onShopSelect, onShopHover, isSidebarOpen, o
       </MapContainer>
       <SidebarToggleButton isOpen={isSidebarOpen} onToggle={onToggleSidebar} />
       <AddShopButton isAddMode={isAddMode} onToggle={onToggleAddMode} />
+      <Legend />
 
       {/* Add Mode Banner */}
       {isAddMode && (

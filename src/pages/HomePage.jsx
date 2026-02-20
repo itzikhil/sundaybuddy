@@ -10,6 +10,7 @@ import ShopPreviewCard from '../components/ShopPreviewCard'
 import AddShopModal from '../components/AddShopModal'
 import { supabase } from '../supabaseClient'
 import { getShopImage } from '../utils/imageUtils'
+import { isOpenNow } from '../utils/timeUtils'
 
 const DEFAULT_DESCRIPTION = 'A great local spot in the neighborhood.'
 
@@ -91,9 +92,9 @@ export default function HomePage() {
       )
     }
 
-    // Filter by open now
+    // Filter by open now - use real-time calculation based on sundayHours
     if (showOpenOnly) {
-      filtered = filtered.filter((shop) => shop.isOpen)
+      filtered = filtered.filter((shop) => isOpenNow(shop.sundayHours))
     }
 
     return filtered
