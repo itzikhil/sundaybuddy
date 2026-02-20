@@ -78,9 +78,11 @@ export default function HomePage() {
   const filteredShops = useMemo(() => {
     let filtered = shops
 
-    // Filter by category
+    // Filter by category (case-insensitive)
     if (activeFilter !== 'All') {
-      filtered = filtered.filter((shop) => shop.category === activeFilter)
+      filtered = filtered.filter((shop) =>
+        shop.category && shop.category.toLowerCase() === activeFilter.toLowerCase()
+      )
     }
 
     // Filter by search query
@@ -112,8 +114,8 @@ export default function HomePage() {
 
         {/* Content Area - Grid or Map based on viewMode */}
         <div className="flex-1 overflow-hidden relative">
-          {/* View Toggle - Positioned inside content area */}
-          <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50">
+          {/* View Toggle - Positioned above map (z-[1001] to be above Leaflet's z-[1000]) */}
+          <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[1001]">
             <div className="flex bg-white rounded-full shadow-lg border border-gray-200 p-1">
               <button
                 onClick={() => setViewMode('grid')}
