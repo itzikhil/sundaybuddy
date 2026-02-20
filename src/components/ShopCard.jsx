@@ -8,7 +8,7 @@ const categoryStyles = {
 }
 
 export default function ShopCard({ shop, isSelected, onClick }) {
-  const open = isOpen(shop.sundayHours)
+  const open = isOpen(shop.sundayHours, shop.isOpen)
 
   const handleDirections = (e) => {
     e.stopPropagation()

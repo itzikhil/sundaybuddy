@@ -16,7 +16,7 @@ const tagConfig = {
 export default function ShopPreviewCard({ shop }) {
   if (!shop) return null
 
-  const open = isOpen(shop.sundayHours)
+  const open = isOpen(shop.sundayHours, shop.isOpen)
 
   return (
     <div className="absolute top-4 right-4 z-[1000] w-80 bg-white rounded-xl shadow-2xl border border-gray-100 p-4 pointer-events-none animate-fade-in-up">
