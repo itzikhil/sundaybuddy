@@ -14,6 +14,18 @@ import { isOpenNow } from '../utils/timeUtils'
 
 const DEFAULT_DESCRIPTION = 'A great local spot in the neighborhood.'
 
+// Map filter IDs to possible database category values (all lowercase for matching)
+const categoryAliases = {
+  'Supermarket': ['supermarket'],
+  'convenience': ['späti', 'kiosk', 'convenience'],
+  'Pharmacy': ['pharmacy'],
+  'bakery': ['bakery'],
+  'kid_cafe': ['kid cafe', 'kid_cafe', 'indoor play', 'indoor_play', 'family attraction', 'family_attraction', 'playground'],
+  'petting_zoo': ['petting zoo', 'petting_zoo', 'zoo', 'animal park'],
+  'indoor_play': ['indoor play', 'indoor_play', 'trampoline', 'climbing'],
+  'museum': ['museum', 'gallery', 'art gallery']
+}
+
 export default function HomePage() {
   const [shops, setShops] = useState([])
   const [loading, setLoading] = useState(true)
@@ -78,11 +90,20 @@ export default function HomePage() {
   const filteredShops = useMemo(() => {
     let filtered = shops
 
-    // Filter by category (case-insensitive)
+    // Filter by category using aliases for robust matching
     if (activeFilter !== 'All') {
-      filtered = filtered.filter((shop) =>
-        shop.category && shop.category.toLowerCase() === activeFilter.toLowerCase()
-      )
+      const aliases = categoryAliases[activeFilter]
+      if (aliases) {
+        // Use alias array for matching
+        filtered = filtered.filter((shop) =>
+          shop.category && aliases.includes(shop.category.toLowerCase().trim())
+        )
+      } else {
+        // Fallback to direct case-insensitive match
+        filtered = filtered.filter((shop) =>
+          shop.category && shop.category.toLowerCase() === activeFilter.toLowerCase()
+        )
+      }
     }
 
     // Filter by search query
